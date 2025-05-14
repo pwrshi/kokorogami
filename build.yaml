@@ -1,0 +1,16 @@
+targets:
+  $default:
+    builders:
+      source_gen|combining_builder:
+        options:
+          build_extensions:
+            'lib/{{path}}/{{file}}.dart': 'lib/gen/{{path}}/{{file}}.g.dart'
+      retrofit_generator:
+        options:
+          build_extensions:
+            'lib/{{path}}/{{file}}.dart': 'lib/gen/{{path}}/{{file}}.g.dart'
+      freezed:
+        enabled: true
+        options:
+          build_extensions:
+            'lib/{{path}}/{{file}}.dart': 'lib/gen/{{path}}/{{file}}.freezed.dart'
