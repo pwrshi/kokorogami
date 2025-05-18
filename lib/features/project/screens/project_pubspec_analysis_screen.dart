@@ -3,6 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart'; // Import Material for CircularProgressIndicator and ListView
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:macos_ui/macos_ui.dart';
+import 'dart:io' show Platform;
+import 'package:yaru/yaru.dart';
 
 // Import the BLoC and State
 import '../bloc/project_bloc.dart';
@@ -13,99 +15,100 @@ class ProjectPubspecAnalysisScreen extends StatefulWidget {
   const ProjectPubspecAnalysisScreen({super.key, required this.projectPath});
 
   @override
-  State<ProjectPubspecAnalysisScreen> createState() =>
-      _ProjectPubspecAnalysisScreenState();
+  State<ProjectPubspecAnalysisScreen> createState() => _ProjectPubspecAnalysisScreenState();
 }
 
-class _ProjectPubspecAnalysisScreenState
-    extends State<ProjectPubspecAnalysisScreen> {
+class _ProjectPubspecAnalysisScreenState extends State<ProjectPubspecAnalysisScreen> {
   @override
   void initState() {
     super.initState();
     // Dispatch the analysis event when the screen is initialized
     // Ensure the BLoC is available in the widget tree (e.g., provided higher up)
-    context.read<ProjectBloc>().add(
-      ProjectEvents.analyzePubspec(projectPath: widget.projectPath),
-    );
+    context.read<ProjectBloc>().add(ProjectEvents.analyzePubspec(projectPath: widget.projectPath));
+  }
+
+  Widget _buildContent(BuildContext context, ProjectState state, ScrollController? scrollController) {
+    switch (state.pubspecAnalysisStatus) {
+      case PubspecAnalysisStatus.initial:
+        return const Center(child: Text('Press the button to analyze'));
+      case PubspecAnalysisStatus.loading:
+        return const Center(child: CircularProgressIndicator());
+      case PubspecAnalysisStatus.success:
+        if (state.packagesWithVulnerabilities.isEmpty) {
+          return const Center(child: Text('No packages found or all are clear.'));
+        }
+        return ListView.builder(
+          controller: scrollController, // Will be null for Yaru, used by Mac
+          itemCount: state.packagesWithVulnerabilities.length,
+          itemBuilder: (context, index) {
+            final item = state.packagesWithVulnerabilities[index];
+            String subtitleText;
+            if (item.vulnerabilities != null && item.vulnerabilities!.isNotEmpty) {
+              final firstVuln = item.vulnerabilities!.first;
+              subtitleText =
+                  'Vulnerabilities Found:\n'
+                  'ID: ${firstVuln.id}\n'
+                  'Severity: ${firstVuln.databaseSpecific?.severity ?? (firstVuln.severity?.isNotEmpty == true ? firstVuln.severity!.first.score : 'N/A')}\n'
+                  'Summary: ${firstVuln.summary ?? 'No summary available'}';
+            } else {
+              subtitleText = 'No vulnerabilities found for this package.';
+            }
+            return ListTile(
+              title: Text('${item.name} (${item.version})'),
+              subtitle: Text(subtitleText),
+              isThreeLine: item.vulnerabilities != null && item.vulnerabilities!.isNotEmpty,
+            );
+          },
+        );
+      case PubspecAnalysisStatus.failure:
+        return Center(child: Text('Error: ${state.pubspecAnalysisError ?? "Unknown error"}'));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return MacosScaffold(
-      toolBar: ToolBar(
-        leading: MacosTooltip(
-          message: 'Toggle Sidebar',
-          useMousePosition: false,
-          child: MacosIconButton(
-            icon: MacosIcon(
-              CupertinoIcons.sidebar_left,
-              color: MacosTheme.brightnessOf(context).resolve(
-                const Color.fromRGBO(0, 0, 0, 0.5),
-                const Color.fromRGBO(255, 255, 255, 0.5),
+    if (Platform.isMacOS) {
+      return MacosScaffold(
+        toolBar: ToolBar(
+          leading: MacosTooltip(
+            message: 'Toggle Sidebar',
+            useMousePosition: false,
+            child: MacosIconButton(
+              icon: MacosIcon(
+                CupertinoIcons.sidebar_left,
+                color: MacosTheme.brightnessOf(
+                  context,
+                ).resolve(const Color.fromRGBO(0, 0, 0, 0.5), const Color.fromRGBO(255, 255, 255, 0.5)),
+                size: 20.0,
               ),
-              size: 20.0,
+              boxConstraints: const BoxConstraints(minHeight: 20, minWidth: 20, maxWidth: 48, maxHeight: 38),
+              onPressed: () => MacosWindowScope.of(context).toggleSidebar(),
             ),
-            boxConstraints: const BoxConstraints(
-              minHeight: 20,
-              minWidth: 20,
-              maxWidth: 48,
-              maxHeight: 38,
-            ),
-            onPressed: () => MacosWindowScope.of(context).toggleSidebar(),
           ),
+          title: const Text('Pubspec Analysis'),
         ),
-        title: const Text('Pubspec Analysis'),
-      ),
-      children: [
-        ContentArea(
-          builder: (context, scrollController) {
-            // Use BlocBuilder to react to state changes and update the UI
-            return BlocBuilder<ProjectBloc, ProjectState>(
-              builder: (context, state) {
-                switch (state.pubspecAnalysisStatus) {
-                  case PubspecAnalysisStatus.initial:
-                    // This state might not be reached if analysis starts in initState,
-                    // but good to handle. Could show a button to start analysis.
-                    return const Center(
-                      child: Text('Press the button to analyze'),
-                    );
-                  case PubspecAnalysisStatus.loading:
-                    return const Center(child: CircularProgressIndicator());
-                  case PubspecAnalysisStatus.success:
-                    if (state.vulnerableDependencies.isEmpty) {
-                      return const Center(
-                        child: Text('No vulnerabilities found.'),
-                      );
-                    }
-                    return ListView.builder(
-                      controller:
-                          scrollController, // Pass the scroll controller
-                      itemCount: state.vulnerableDependencies.length,
-                      itemBuilder: (context, index) {
-                        final item = state.vulnerableDependencies[index];
-                        return ListTile(
-                          title: Text(
-                            '${item.packageName} (${item.installedVersion})',
-                          ),
-                          subtitle: Text(
-                            'CVE: ${item.cveId}\nSeverity: ${item.severity}\nDescription: ${item.description}',
-                          ),
-                          isThreeLine: true,
-                        );
-                      },
-                    );
-                  case PubspecAnalysisStatus.failure:
-                    return Center(
-                      child: Text(
-                        'Error: ${state.pubspecAnalysisError ?? "Unknown error"}',
-                      ),
-                    );
-                }
-              },
-            );
+        children: [
+          ContentArea(
+            builder: (context, scrollController) {
+              return BlocBuilder<ProjectBloc, ProjectState>(
+                builder: (context, state) {
+                  return _buildContent(context, state, scrollController); // Pass scrollController for Mac
+                },
+              );
+            },
+          ),
+        ],
+      );
+    } else {
+      // Yaru equivalent for other platforms
+      return YaruDetailPage(
+        appBar: const YaruWindowTitleBar(title: Text('Pubspec Analysis')),
+        body: BlocBuilder<ProjectBloc, ProjectState>(
+          builder: (context, state) {
+            return _buildContent(context, state, null); // Pass null for scrollController for Yaru
           },
         ),
-      ],
-    );
+      );
+    }
   }
 }

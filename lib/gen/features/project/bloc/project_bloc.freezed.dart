@@ -276,7 +276,7 @@ mixin _$ProjectState {
 // Existing fields (assuming they are or will be part of the state)
  String get projectPath; bool get isSadtScanning;// Example existing field
 // New fields for pubspec analysis
- PubspecAnalysisStatus get pubspecAnalysisStatus; List<VulnerableDependency> get vulnerableDependencies; String? get pubspecAnalysisError;
+ PubspecAnalysisStatus get pubspecAnalysisStatus; List<PackageInfo> get packagesWithVulnerabilities; String? get pubspecAnalysisError;
 /// Create a copy of ProjectState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -287,16 +287,16 @@ $ProjectStateCopyWith<ProjectState> get copyWith => _$ProjectStateCopyWithImpl<P
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProjectState&&(identical(other.projectPath, projectPath) || other.projectPath == projectPath)&&(identical(other.isSadtScanning, isSadtScanning) || other.isSadtScanning == isSadtScanning)&&(identical(other.pubspecAnalysisStatus, pubspecAnalysisStatus) || other.pubspecAnalysisStatus == pubspecAnalysisStatus)&&const DeepCollectionEquality().equals(other.vulnerableDependencies, vulnerableDependencies)&&(identical(other.pubspecAnalysisError, pubspecAnalysisError) || other.pubspecAnalysisError == pubspecAnalysisError));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProjectState&&(identical(other.projectPath, projectPath) || other.projectPath == projectPath)&&(identical(other.isSadtScanning, isSadtScanning) || other.isSadtScanning == isSadtScanning)&&(identical(other.pubspecAnalysisStatus, pubspecAnalysisStatus) || other.pubspecAnalysisStatus == pubspecAnalysisStatus)&&const DeepCollectionEquality().equals(other.packagesWithVulnerabilities, packagesWithVulnerabilities)&&(identical(other.pubspecAnalysisError, pubspecAnalysisError) || other.pubspecAnalysisError == pubspecAnalysisError));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,projectPath,isSadtScanning,pubspecAnalysisStatus,const DeepCollectionEquality().hash(vulnerableDependencies),pubspecAnalysisError);
+int get hashCode => Object.hash(runtimeType,projectPath,isSadtScanning,pubspecAnalysisStatus,const DeepCollectionEquality().hash(packagesWithVulnerabilities),pubspecAnalysisError);
 
 @override
 String toString() {
-  return 'ProjectState(projectPath: $projectPath, isSadtScanning: $isSadtScanning, pubspecAnalysisStatus: $pubspecAnalysisStatus, vulnerableDependencies: $vulnerableDependencies, pubspecAnalysisError: $pubspecAnalysisError)';
+  return 'ProjectState(projectPath: $projectPath, isSadtScanning: $isSadtScanning, pubspecAnalysisStatus: $pubspecAnalysisStatus, packagesWithVulnerabilities: $packagesWithVulnerabilities, pubspecAnalysisError: $pubspecAnalysisError)';
 }
 
 
@@ -307,7 +307,7 @@ abstract mixin class $ProjectStateCopyWith<$Res>  {
   factory $ProjectStateCopyWith(ProjectState value, $Res Function(ProjectState) _then) = _$ProjectStateCopyWithImpl;
 @useResult
 $Res call({
- String projectPath, bool isSadtScanning, PubspecAnalysisStatus pubspecAnalysisStatus, List<VulnerableDependency> vulnerableDependencies, String? pubspecAnalysisError
+ String projectPath, bool isSadtScanning, PubspecAnalysisStatus pubspecAnalysisStatus, List<PackageInfo> packagesWithVulnerabilities, String? pubspecAnalysisError
 });
 
 
@@ -324,13 +324,13 @@ class _$ProjectStateCopyWithImpl<$Res>
 
 /// Create a copy of ProjectState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? projectPath = null,Object? isSadtScanning = null,Object? pubspecAnalysisStatus = null,Object? vulnerableDependencies = null,Object? pubspecAnalysisError = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? projectPath = null,Object? isSadtScanning = null,Object? pubspecAnalysisStatus = null,Object? packagesWithVulnerabilities = null,Object? pubspecAnalysisError = freezed,}) {
   return _then(_self.copyWith(
 projectPath: null == projectPath ? _self.projectPath : projectPath // ignore: cast_nullable_to_non_nullable
 as String,isSadtScanning: null == isSadtScanning ? _self.isSadtScanning : isSadtScanning // ignore: cast_nullable_to_non_nullable
 as bool,pubspecAnalysisStatus: null == pubspecAnalysisStatus ? _self.pubspecAnalysisStatus : pubspecAnalysisStatus // ignore: cast_nullable_to_non_nullable
-as PubspecAnalysisStatus,vulnerableDependencies: null == vulnerableDependencies ? _self.vulnerableDependencies : vulnerableDependencies // ignore: cast_nullable_to_non_nullable
-as List<VulnerableDependency>,pubspecAnalysisError: freezed == pubspecAnalysisError ? _self.pubspecAnalysisError : pubspecAnalysisError // ignore: cast_nullable_to_non_nullable
+as PubspecAnalysisStatus,packagesWithVulnerabilities: null == packagesWithVulnerabilities ? _self.packagesWithVulnerabilities : packagesWithVulnerabilities // ignore: cast_nullable_to_non_nullable
+as List<PackageInfo>,pubspecAnalysisError: freezed == pubspecAnalysisError ? _self.pubspecAnalysisError : pubspecAnalysisError // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -342,7 +342,7 @@ as String?,
 
 
 class _ProjectState implements ProjectState {
-  const _ProjectState({this.projectPath = '', this.isSadtScanning = false, this.pubspecAnalysisStatus = PubspecAnalysisStatus.initial, final  List<VulnerableDependency> vulnerableDependencies = const [], this.pubspecAnalysisError}): _vulnerableDependencies = vulnerableDependencies;
+  const _ProjectState({this.projectPath = '', this.isSadtScanning = false, this.pubspecAnalysisStatus = PubspecAnalysisStatus.initial, final  List<PackageInfo> packagesWithVulnerabilities = const [], this.pubspecAnalysisError}): _packagesWithVulnerabilities = packagesWithVulnerabilities;
   
 
 // Existing fields (assuming they are or will be part of the state)
@@ -351,11 +351,11 @@ class _ProjectState implements ProjectState {
 // Example existing field
 // New fields for pubspec analysis
 @override@JsonKey() final  PubspecAnalysisStatus pubspecAnalysisStatus;
- final  List<VulnerableDependency> _vulnerableDependencies;
-@override@JsonKey() List<VulnerableDependency> get vulnerableDependencies {
-  if (_vulnerableDependencies is EqualUnmodifiableListView) return _vulnerableDependencies;
+ final  List<PackageInfo> _packagesWithVulnerabilities;
+@override@JsonKey() List<PackageInfo> get packagesWithVulnerabilities {
+  if (_packagesWithVulnerabilities is EqualUnmodifiableListView) return _packagesWithVulnerabilities;
   // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_vulnerableDependencies);
+  return EqualUnmodifiableListView(_packagesWithVulnerabilities);
 }
 
 @override final  String? pubspecAnalysisError;
@@ -370,16 +370,16 @@ _$ProjectStateCopyWith<_ProjectState> get copyWith => __$ProjectStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProjectState&&(identical(other.projectPath, projectPath) || other.projectPath == projectPath)&&(identical(other.isSadtScanning, isSadtScanning) || other.isSadtScanning == isSadtScanning)&&(identical(other.pubspecAnalysisStatus, pubspecAnalysisStatus) || other.pubspecAnalysisStatus == pubspecAnalysisStatus)&&const DeepCollectionEquality().equals(other._vulnerableDependencies, _vulnerableDependencies)&&(identical(other.pubspecAnalysisError, pubspecAnalysisError) || other.pubspecAnalysisError == pubspecAnalysisError));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProjectState&&(identical(other.projectPath, projectPath) || other.projectPath == projectPath)&&(identical(other.isSadtScanning, isSadtScanning) || other.isSadtScanning == isSadtScanning)&&(identical(other.pubspecAnalysisStatus, pubspecAnalysisStatus) || other.pubspecAnalysisStatus == pubspecAnalysisStatus)&&const DeepCollectionEquality().equals(other._packagesWithVulnerabilities, _packagesWithVulnerabilities)&&(identical(other.pubspecAnalysisError, pubspecAnalysisError) || other.pubspecAnalysisError == pubspecAnalysisError));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,projectPath,isSadtScanning,pubspecAnalysisStatus,const DeepCollectionEquality().hash(_vulnerableDependencies),pubspecAnalysisError);
+int get hashCode => Object.hash(runtimeType,projectPath,isSadtScanning,pubspecAnalysisStatus,const DeepCollectionEquality().hash(_packagesWithVulnerabilities),pubspecAnalysisError);
 
 @override
 String toString() {
-  return 'ProjectState(projectPath: $projectPath, isSadtScanning: $isSadtScanning, pubspecAnalysisStatus: $pubspecAnalysisStatus, vulnerableDependencies: $vulnerableDependencies, pubspecAnalysisError: $pubspecAnalysisError)';
+  return 'ProjectState(projectPath: $projectPath, isSadtScanning: $isSadtScanning, pubspecAnalysisStatus: $pubspecAnalysisStatus, packagesWithVulnerabilities: $packagesWithVulnerabilities, pubspecAnalysisError: $pubspecAnalysisError)';
 }
 
 
@@ -390,7 +390,7 @@ abstract mixin class _$ProjectStateCopyWith<$Res> implements $ProjectStateCopyWi
   factory _$ProjectStateCopyWith(_ProjectState value, $Res Function(_ProjectState) _then) = __$ProjectStateCopyWithImpl;
 @override @useResult
 $Res call({
- String projectPath, bool isSadtScanning, PubspecAnalysisStatus pubspecAnalysisStatus, List<VulnerableDependency> vulnerableDependencies, String? pubspecAnalysisError
+ String projectPath, bool isSadtScanning, PubspecAnalysisStatus pubspecAnalysisStatus, List<PackageInfo> packagesWithVulnerabilities, String? pubspecAnalysisError
 });
 
 
@@ -407,13 +407,13 @@ class __$ProjectStateCopyWithImpl<$Res>
 
 /// Create a copy of ProjectState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? projectPath = null,Object? isSadtScanning = null,Object? pubspecAnalysisStatus = null,Object? vulnerableDependencies = null,Object? pubspecAnalysisError = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? projectPath = null,Object? isSadtScanning = null,Object? pubspecAnalysisStatus = null,Object? packagesWithVulnerabilities = null,Object? pubspecAnalysisError = freezed,}) {
   return _then(_ProjectState(
 projectPath: null == projectPath ? _self.projectPath : projectPath // ignore: cast_nullable_to_non_nullable
 as String,isSadtScanning: null == isSadtScanning ? _self.isSadtScanning : isSadtScanning // ignore: cast_nullable_to_non_nullable
 as bool,pubspecAnalysisStatus: null == pubspecAnalysisStatus ? _self.pubspecAnalysisStatus : pubspecAnalysisStatus // ignore: cast_nullable_to_non_nullable
-as PubspecAnalysisStatus,vulnerableDependencies: null == vulnerableDependencies ? _self._vulnerableDependencies : vulnerableDependencies // ignore: cast_nullable_to_non_nullable
-as List<VulnerableDependency>,pubspecAnalysisError: freezed == pubspecAnalysisError ? _self.pubspecAnalysisError : pubspecAnalysisError // ignore: cast_nullable_to_non_nullable
+as PubspecAnalysisStatus,packagesWithVulnerabilities: null == packagesWithVulnerabilities ? _self._packagesWithVulnerabilities : packagesWithVulnerabilities // ignore: cast_nullable_to_non_nullable
+as List<PackageInfo>,pubspecAnalysisError: freezed == pubspecAnalysisError ? _self.pubspecAnalysisError : pubspecAnalysisError // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

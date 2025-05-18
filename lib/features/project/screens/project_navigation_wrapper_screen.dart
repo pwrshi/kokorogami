@@ -6,32 +6,26 @@ import 'package:kokorogami/entrypoint/routes.gr.dart';
 import 'package:kokorogami/features/project/bloc/project_bloc.dart';
 import 'package:macos_ui/macos_ui.dart';
 import 'package:window_manager/window_manager.dart';
+import 'dart:io' show Platform;
+import 'package:yaru/yaru.dart';
+import 'package:flutter/material.dart';
 
 @RoutePage()
-class ProjectNavigationWrapperScreen extends StatefulWidget
-    implements AutoRouteWrapper {
-  const ProjectNavigationWrapperScreen({
-    super.key,
-    @PathParam('folderPath') required this.folderPath,
-  });
+class ProjectNavigationWrapperScreen extends StatefulWidget implements AutoRouteWrapper {
+  const ProjectNavigationWrapperScreen({super.key, @PathParam('folderPath') required this.folderPath});
 
   final String folderPath;
 
   @override
-  State<ProjectNavigationWrapperScreen> createState() =>
-      _ProjectNavigationWrapperScreenState();
+  State<ProjectNavigationWrapperScreen> createState() => _ProjectNavigationWrapperScreenState();
 
   @override
   Widget wrappedRoute(BuildContext context) {
-    return BlocProvider<ProjectBloc>(
-      create: (context) => ProjectBloc(di()),
-      child: this,
-    );
+    return BlocProvider<ProjectBloc>(create: (context) => ProjectBloc(di()), child: this);
   }
 }
 
-class _ProjectNavigationWrapperScreenState
-    extends State<ProjectNavigationWrapperScreen> {
+class _ProjectNavigationWrapperScreenState extends State<ProjectNavigationWrapperScreen> {
   @override
   void initState() {
     super.initState();
@@ -45,53 +39,65 @@ class _ProjectNavigationWrapperScreenState
 
   @override
   Widget build(BuildContext context) {
-    return PlatformMenuBar(
-      menus: const [
-        PlatformMenu(
-          label: 'Kokorogami',
-          menus: [
-            PlatformProvidedMenuItem(type: PlatformProvidedMenuItemType.about),
-            PlatformProvidedMenuItem(type: PlatformProvidedMenuItemType.quit),
-          ],
-        ),
-      ],
-      child: AutoTabsRouter.tabBar(
-        animatePageTransition: false,
-        routes: [
-          ProjectOverviewRoute(),
-          ProjectPubspecAnalysisRoute(projectPath: widget.folderPath),
-          ProjectSadtRoute(),
-        ],
-        builder: (context, child, tabController) {
-          return MacosWindow(
-            sidebar: Sidebar(
-              minWidth: 200,
-              builder:
-                  (context, scrollController) => SidebarItems(
-                    currentIndex: tabController.index,
-                    onChanged: (index) {
-                      tabController.animateTo(index);
-                    },
-                    items: const [
-                      SidebarItem(
-                        leading: MacosIcon(CupertinoIcons.home),
-                        label: Text('Overview'),
-                      ),
-                      SidebarItem(
-                        leading: MacosIcon(CupertinoIcons.hare),
-                        label: Text('Pubspec analysis'),
-                      ),
-                      SidebarItem(
-                        leading: MacosIcon(CupertinoIcons.ant),
-                        label: Text('SADT analysis'),
-                      ),
-                    ],
-                  ),
+    final navItems = [
+      (title: 'Overview', ubuntuIcon: YaruIcons.home, macosIcon: CupertinoIcons.home),
+      (title: 'Pubspec analysis', ubuntuIcon: YaruIcons.search, macosIcon: CupertinoIcons.hare),
+      (title: 'SADT analysis', ubuntuIcon: YaruIcons.settings, macosIcon: CupertinoIcons.ant),
+    ];
+
+    final List<PageRouteInfo<dynamic>> routes = [
+      ProjectOverviewRoute(),
+      ProjectPubspecAnalysisRoute(projectPath: widget.folderPath),
+      ProjectSadtRoute(),
+    ];
+
+    return AutoTabsRouter.tabBar(
+      animatePageTransition: false,
+      routes: routes,
+      builder: (context, child, tabController) {
+        return switch (Platform.operatingSystem) {
+          'macos' => PlatformMenuBar(
+            menus: const [],
+            child: MacosWindow(
+              sidebar: Sidebar(
+                minWidth: 200,
+                builder:
+                    (context, scrollController) => SidebarItems(
+                      currentIndex: tabController.index,
+                      onChanged: (index) {
+                        tabController.animateTo(index);
+                      },
+                      items:
+                          navItems
+                              .map((item) => SidebarItem(leading: MacosIcon(item.macosIcon), label: Text(item.title)))
+                              .toList(),
+                    ),
+              ),
+              child: child,
             ),
-            child: child,
-          );
-        },
-      ),
+          ),
+          _ => Scaffold(
+            body: YaruMasterDetailPage(
+              length: navItems.length,
+              appBar: const YaruWindowTitleBar(),
+              tileBuilder: (context, index, selected, availableWidth) {
+                final item = navItems[index];
+                return YaruMasterTile(
+                  leading: Icon(item.ubuntuIcon),
+                  title: Text(item.title),
+                  selected: tabController.index == index,
+                  onTap: () {
+                    tabController.animateTo(index);
+                  },
+                );
+              },
+              pageBuilder: (context, index) {
+                return child;
+              },
+            ),
+          ),
+        };
+      },
     );
   }
 }

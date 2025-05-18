@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:kokorogami/entrypoint/entrypoint.dart';
 import 'package:kokorogami/entrypoint/init_di.dart';
 import 'package:macos_ui/macos_ui.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:yaru/yaru.dart';
 
 /// This method initializes macos_window_utils and styles the window.
 Future<void> _configureMacosWindowUtils() async {
@@ -16,7 +19,11 @@ Future<void> _configureFixedSize() async {
 }
 
 Future<void> main() async {
-  await _configureMacosWindowUtils();
+  if (Platform.isMacOS) {
+    await _configureMacosWindowUtils();
+  } else {
+    await YaruWindowTitleBar.ensureInitialized();
+  }
   await _configureFixedSize();
   await injectDependencies();
   runApp(const App());
