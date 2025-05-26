@@ -16,7 +16,7 @@ class AppRouter extends RootStackRouter {
           page: ProjectPubspecAnalysisRoute.page,
           path: 'pubspec/:projectPath',
         ),
-        AutoRoute(page: ProjectSadtRoute.page, path: 'sadt'),
+        AutoRoute(page: ProjectSastRoute.page, path: 'sast'),
       ],
     ),
   ];

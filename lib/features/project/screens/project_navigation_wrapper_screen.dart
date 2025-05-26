@@ -11,21 +11,30 @@ import 'package:yaru/yaru.dart';
 import 'package:flutter/material.dart';
 
 @RoutePage()
-class ProjectNavigationWrapperScreen extends StatefulWidget implements AutoRouteWrapper {
-  const ProjectNavigationWrapperScreen({super.key, @PathParam('folderPath') required this.folderPath});
+class ProjectNavigationWrapperScreen extends StatefulWidget
+    implements AutoRouteWrapper {
+  const ProjectNavigationWrapperScreen({
+    super.key,
+    @PathParam('folderPath') required this.folderPath,
+  });
 
   final String folderPath;
 
   @override
-  State<ProjectNavigationWrapperScreen> createState() => _ProjectNavigationWrapperScreenState();
+  State<ProjectNavigationWrapperScreen> createState() =>
+      _ProjectNavigationWrapperScreenState();
 
   @override
   Widget wrappedRoute(BuildContext context) {
-    return BlocProvider<ProjectBloc>(create: (context) => ProjectBloc(di()), child: this);
+    return BlocProvider<ProjectBloc>(
+      create: (context) => ProjectBloc(di()),
+      child: this,
+    );
   }
 }
 
-class _ProjectNavigationWrapperScreenState extends State<ProjectNavigationWrapperScreen> {
+class _ProjectNavigationWrapperScreenState
+    extends State<ProjectNavigationWrapperScreen> {
   @override
   void initState() {
     super.initState();
@@ -40,15 +49,27 @@ class _ProjectNavigationWrapperScreenState extends State<ProjectNavigationWrappe
   @override
   Widget build(BuildContext context) {
     final navItems = [
-      (title: 'Overview', ubuntuIcon: YaruIcons.home, macosIcon: CupertinoIcons.home),
-      (title: 'Pubspec analysis', ubuntuIcon: YaruIcons.search, macosIcon: CupertinoIcons.hare),
-      (title: 'SADT analysis', ubuntuIcon: YaruIcons.settings, macosIcon: CupertinoIcons.ant),
+      (
+        title: 'Overview',
+        ubuntuIcon: YaruIcons.home,
+        macosIcon: CupertinoIcons.home,
+      ),
+      (
+        title: 'Pubspec analysis',
+        ubuntuIcon: YaruIcons.search,
+        macosIcon: CupertinoIcons.hare,
+      ),
+      (
+        title: 'SADT analysis',
+        ubuntuIcon: YaruIcons.settings,
+        macosIcon: CupertinoIcons.ant,
+      ),
     ];
 
     final List<PageRouteInfo<dynamic>> routes = [
       ProjectOverviewRoute(),
       ProjectPubspecAnalysisRoute(projectPath: widget.folderPath),
-      ProjectSadtRoute(),
+      ProjectSastRoute(),
     ];
 
     return AutoTabsRouter.tabBar(
@@ -69,7 +90,12 @@ class _ProjectNavigationWrapperScreenState extends State<ProjectNavigationWrappe
                       },
                       items:
                           navItems
-                              .map((item) => SidebarItem(leading: MacosIcon(item.macosIcon), label: Text(item.title)))
+                              .map(
+                                (item) => SidebarItem(
+                                  leading: MacosIcon(item.macosIcon),
+                                  label: Text(item.title),
+                                ),
+                              )
                               .toList(),
                     ),
               ),

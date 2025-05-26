@@ -17,7 +17,7 @@ import 'package:kokorogami/features/project/screens/project_overview_screen.dart
     as _i2;
 import 'package:kokorogami/features/project/screens/project_pubspec_analysis_screen.dart'
     as _i3;
-import 'package:kokorogami/features/project/screens/project_sadt_screen.dart'
+import 'package:kokorogami/features/project/screens/project_sast_screen.dart'
     as _i4;
 import 'package:kokorogami/features/recent/screens/recent_screen.dart' as _i5;
 
@@ -135,17 +135,17 @@ class ProjectPubspecAnalysisRouteArgs {
 }
 
 /// generated route for
-/// [_i4.ProjectSadtScreen]
-class ProjectSadtRoute extends _i6.PageRouteInfo<void> {
-  const ProjectSadtRoute({List<_i6.PageRouteInfo>? children})
-    : super(ProjectSadtRoute.name, initialChildren: children);
+/// [_i4.ProjectSastScreen]
+class ProjectSastRoute extends _i6.PageRouteInfo<void> {
+  const ProjectSastRoute({List<_i6.PageRouteInfo>? children})
+    : super(ProjectSastRoute.name, initialChildren: children);
 
-  static const String name = 'ProjectSadtRoute';
+  static const String name = 'ProjectSastRoute';
 
   static _i6.PageInfo page = _i6.PageInfo(
     name,
     builder: (data) {
-      return const _i4.ProjectSadtScreen();
+      return const _i4.ProjectSastScreen();
     },
   );
 }
